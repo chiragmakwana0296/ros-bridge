@@ -1,0 +1,36 @@
+services:
+  build_image:
+    image: carla_bridge
+    build: 
+      context: ./..
+      dockerfile: docker/Dockerfile
+      args:
+        - ROS_DISTRO=foxy
+        - CARLA_VERSION=0.9.13
+
+  colcon_build:
+    image: carla_bridge
+    tty: true
+    working_dir: /opt/carla-ros-bridge/src 
+    volumes:
+      - ../:/opt/carla-ros-bridge/src:rw
+    command: colcon build --symlink-install
+
+  run_bridge:
+    image: carla_bridge
+    tty: true
+    working_dir: /opt/carla-ros-bridge 
+    network_mode: "host"
+    environment:
+      - DISPLAY=${DISPLAY}  # Forward display to the host
+      - QT_X11_NO_MITSHM=1  # Fix shared memory issues with Qt apps
+      - XDG_RUNTIME_DIR  # For Wayland support
+    volumes:
+      -  /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ../:/opt/carla-ros-bridge/src:rw
+      - ./content/carla-0.9.13-py3.10-linux-x86_64.egg:/opt/carla/PythonAPI/carla/dist/carla-0.9.13-py3.10-linux-x86_64.egg
+      - ./content/carla-0.9.13-cp310-cp310-linux_x86_64.whl:/opt/carla/PythonAPI/carla/dist/carla-0.9.13-cp310-cp310-linux_x86_64.whl
+    command: sleep 1000
+
+
+

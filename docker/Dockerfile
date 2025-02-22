@@ -3,7 +3,8 @@ ARG ROS_DISTRO
 
 FROM carlasim/carla:$CARLA_VERSION as carla
 
-FROM ros:$ROS_DISTRO-ros-base
+# FROM ros:$ROS_DISTRO-ros-base
+FROM osrf/ros:$ROS_DISTRO-desktop
 
 ARG CARLA_VERSION
 ARG ROS_DISTRO

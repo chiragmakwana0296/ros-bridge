@@ -32,7 +32,50 @@ shift $((OPTIND-1))
 
 echo "Using $DOCKER_IMAGE_NAME:$TAG"
 
+# docker run \
+#     -it --rm \
+#     --net=host \
+#     "$DOCKER_IMAGE_NAME:$TAG" "$@"
+
+
+# docker run \
+#     -it --rm \
+#     --net=host \
+#     -e DISPLAY=$DISPLAY \
+#     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+#     "$DOCKER_IMAGE_NAME:$TAG" "$@"
+
+# docker run \
+#     -it --rm \
+#     --network=host \
+#     --ipc=host \
+#     -e DISPLAY=$DISPLAY \
+#     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+#     -v /home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml:/home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml \
+#     -e XDG_SESSION_TYPE=x11 \
+#     "$DOCKER_IMAGE_NAME:$TAG" "$@"
+
+
 docker run \
     -it --rm \
-    --net=host \
+    --ipc=host \
+    --gpus all \
+    --user root \
+    -e DISPLAY=$DISPLAY \
+    -v /dev/shm:/dev/shm \
+    -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    --runtime=nvidia \
     "$DOCKER_IMAGE_NAME:$TAG" "$@"
+
+    # -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
+    # -e FASTRTPS_DEFAULT_PROFILES_FILE=/home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml> \
+
+# docker run \
+#   -it --rm \
+#   --runtime=nvidia \
+#   --net=host \
+#   --env=DISPLAY=$DISPLAY \
+#   --env=NVIDIA_VISIBLE_DEVICES=all \
+#   --env=NVIDIA_DRIVER_CAPABILITIES=all \
+#   --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+#   "$DOCKER_IMAGE_NAME:$TAG" "$@"
