@@ -25,6 +25,10 @@ RUN /bin/bash -c 'source /opt/ros/$ROS_DISTRO/setup.bash; \
     echo "export PYTHONPATH=\$PYTHONPATH:/opt/carla/PythonAPI/carla/dist/$(ls /opt/carla/PythonAPI/carla/dist | grep py$ROS_PYTHON_VERSION.)" >> /opt/carla/setup.bash; \
     echo "export PYTHONPATH=\$PYTHONPATH:/opt/carla/PythonAPI/carla" >> /opt/carla/setup.bash'
 
+RUN apt-get update && apt-get install --no-install-recommends -y \ 
+    ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
+    && rm -rf /var/lib/apt/lists/*    
+
 COPY . /opt/carla-ros-bridge/src/
 RUN /bin/bash -c 'source /opt/ros/$ROS_DISTRO/setup.bash; \
     if [ "$ROS_VERSION" == "2" ]; then colcon build; else catkin_make install; fi'

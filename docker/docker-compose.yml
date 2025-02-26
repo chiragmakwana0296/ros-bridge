@@ -1,6 +1,6 @@
 services:
   build_image:
-    image: carla_bridge
+    image: carla-ros-bridge
     build: 
       context: ./..
       dockerfile: docker/Dockerfile
@@ -9,7 +9,7 @@ services:
         - CARLA_VERSION=0.9.13
 
   colcon_build:
-    image: carla_bridge
+    image: carla-ros-bridge
     tty: true
     working_dir: /opt/carla-ros-bridge/src 
     volumes:
@@ -17,20 +17,60 @@ services:
     command: colcon build --symlink-install
 
   run_bridge:
-    image: carla_bridge
+    image: carla-ros-bridge
     tty: true
-    working_dir: /opt/carla-ros-bridge 
-    network_mode: "host"
+    ipc: host
+    network_mode: host
+    user: root
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
     environment:
       - DISPLAY=${DISPLAY}  # Forward display to the host
-      - QT_X11_NO_MITSHM=1  # Fix shared memory issues with Qt apps
-      - XDG_RUNTIME_DIR  # For Wayland support
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/dds.xml 
+      - ROS_DOMAIN_ID=31 
     volumes:
       -  /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ../:/opt/carla-ros-bridge/src:rw
-      - ./content/carla-0.9.13-py3.10-linux-x86_64.egg:/opt/carla/PythonAPI/carla/dist/carla-0.9.13-py3.10-linux-x86_64.egg
-      - ./content/carla-0.9.13-cp310-cp310-linux_x86_64.whl:/opt/carla/PythonAPI/carla/dist/carla-0.9.13-cp310-cp310-linux_x86_64.whl
-    command: sleep 1000
+      - /dev/shm:/dev/shm
+      - ../docker/content/dds.xml:/dds.xml
+    working_dir: /opt/carla-ros-bridge 
+    command: ros2 launch carla_ros_bridge carla_ros_bridge_with_example_ego_vehicle.launch.py
+
+  generate_traffic:
+    image: carla-ros-bridge
+    tty: true
+    ipc: host
+    network_mode: host
+    user: root
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    environment:
+      - DISPLAY=${DISPLAY}  # Forward display to the host
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp 
+      - FASTRTPS_DEFAULT_PROFILES_FILE=/dds.xml 
+      - ROS_DOMAIN_ID=31 
+    volumes:
+      -  /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ../:/opt/carla-ros-bridge/src:rw
+      - /dev/shm:/dev/shm
+      - ../docker/content/dds.xml:/dds.xml
+    working_dir: /opt/carla-ros-bridge 
+    command: python3 /opt/carla/PythonAPI/examples/generate_traffic.py
+
+
 
 
 

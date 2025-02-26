@@ -14,6 +14,7 @@
             <userTransports>
                 <transport_id>CustomUDPTransport</transport_id>
             </userTransports>
+            <useBuiltinTransports>false</useBuiltinTransports>
         </rtps>
     </participant>
 </profiles>

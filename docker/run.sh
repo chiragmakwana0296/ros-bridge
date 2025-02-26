@@ -56,15 +56,21 @@ echo "Using $DOCKER_IMAGE_NAME:$TAG"
 #     "$DOCKER_IMAGE_NAME:$TAG" "$@"
 
 
+
 docker run \
     -it --rm \
     --ipc=host \
+    --net=host \
     --gpus all \
     --user root \
     -e DISPLAY=$DISPLAY \
     -v /dev/shm:/dev/shm \
     -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    -v /home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml:/home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml \
     --runtime=nvidia \
+    -e RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    -e FASTRTPS_DEFAULT_PROFILES_FILE=/home/chirag/carla_ws/src/ros-bridge/docker/content/dds.xml \
+    -e ROS_DOMAIN_ID=31 \
     "$DOCKER_IMAGE_NAME:$TAG" "$@"
 
     # -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp \
